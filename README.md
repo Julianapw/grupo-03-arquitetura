@@ -2,7 +2,7 @@
 
 **Grupo 03 | Envelope 02**
 
-Ana Beatriz Maranho, Kaue Farias, Julia Kimura, Juliana Prado, Matias Amma
+Ana Beatriz Maranho, Kaue Farias, Julia Kimura, Juliana Prado, Matias Amma e Ruan Dias Da Silva.
 
 Este repositório reúne o projeto de arquitetura para o novo sistema de bilhetagem eletrônica da cidade, desenvolvido para a disciplina de Arquitetura de Software. O caso é o do transporte público (Caso Ônibus), com a situação sorteada correspondente ao Envelope 02.
 
