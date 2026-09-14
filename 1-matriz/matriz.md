@@ -38,13 +38,11 @@ Conforme o Apêndice A.1 do livro, as classificações dos atributos indicam ten
 
 ## Síntese da análise
 
-Os estilos com maior aderência à estrutura geral são:
-Porque:
+Pela análise, os estilos que mais combinam com o projeto são microsserviços, arquitetura orientada a eventos e arquitetura celular. Eles ajudam os cinco times a trabalhar em partes diferentes do sistema, enviar os registros quando a conexão voltar e diminuir o impacto das falhas. Isso é importante porque o contrato exige alta disponibilidade. Mesmo com essa estrutura, o validador precisa funcionar no ônibus sem depender da internet.
 
-Os demais estilos aceitos podem ser aplicados localmente: hexagonal dentro dos serviços críticos; event sourcing no repasse auditável; 
-#Adicionar aqui se tiver mais estilos aceitos que podem ser aplicados localmente !!!
+Os outros estilos podem ajudar em funções específicas. Por exemplo, CQRS nas consultas de extratos, Event Sourcing no histórico usado para conferir o repasse e Microkernel para acrescentar novas regras de tarifa. Já os monolitos podem organizar partes como atendimento e cartões, conforme indicado na matriz. Não seria necessário usar todos os estilos desde o início.
 
-Os estilos (X) foram descartados como arquitetura geral, pois:
+Para o sistema inteiro, descartamos os monolitos porque seria mais difícil atualizar e aumentar a capacidade de cada parte separadamente. Também não usaríamos o ESB para toda a comunicação, pois uma falha nele poderia afetar vários serviços. Serverless ficaria para tarefas pontuais, como notificações, já que os ônibus precisam funcionar sem rede e a telemetria envia dados o tempo todo.
 
 ## Relação preliminar com as perguntas obrigatórias
 
