@@ -19,6 +19,21 @@ Os diagramas que justificam essa decisão são os de nível 1 e 2, que mapeiam v
 
 ### 3. Como a telemetria escala no pico sem derrubar o restante do sistema?
 
+A telemetria escala no pico sem derrubar o restante do sistema porque, na arquitetura definida, o fluxo de posições GPS é totalmente separado dos fluxos críticos de validação e recarga, tanto na entrada quanto no processamento.
+
+Cada ônibus envia suas coordenadas GPS ao Serviço de Telemetria (visível no diagrama C4 de contêineres), que é um serviço dedicado e independente dos serviços de Cartões e Recarga e de Sincronização. O Serviço de Telemetria recebe os dados via HTTPS pelo API Gateway e os publica imediatamente no Barramento de Eventos (Apache Kafka) usando o protocolo Kafka nativo, em tópicos particionados exclusivos para telemetria. Isso significa que, mesmo no pico de 400 mensagens por segundo, a ingestão é feita de forma assíncrona: o serviço produtor apenas envia e não espera processamento de volta.
+
+O Kafka atua como amortecedor de pico (buffer): se os consumidores de telemetria (ex.: Informação ao Passageiro para previsão de chegada, Órgão Gestor para monitoramento da frota) não conseguem consumir na mesma velocidade do pico, as mensagens ficam retidas no tópico particionado até serem processadas, sem gerar contrapressão no produtor nem no restante do sistema. Os tópicos de telemetria são fisicamente separados dos tópicos de validação e recarga no Kafka, portanto um acúmulo de mensagens de GPS não atrasa a sincronização de validações offline nem a propagação de recargas.
+
+Além disso, como o Serviço de Telemetria é uma unidade de implantação independente (ADR 0004), ele pode escalar horizontalmente — adicionando mais instâncias — sem afetar ou exigir reimplantação dos outros serviços. Os serviços críticos de Cartões e Recarga, por sua vez, estão implantados em células independentes e redundantes (ADR 0005), com recursos de computação e banco de dados próprios, completamente isolados da infraestrutura de telemetria.
+
+Os ADRs que justificam essas decisões são:
+- 0003 — Define eventos assíncronos persistentes como padrão de integração, permitindo que telemetria use o barramento sem acoplamento temporal com validação e recarga.
+- 0004 — Separa o backend por subdomínios de negócio, garantindo que o Serviço de Telemetria seja uma unidade independente com escala própria.
+- 0005 — Implanta os serviços críticos em células independentes, isolando fisicamente validação e recarga de qualquer pico de carga nos demais subdomínios.
+
+O diagrama que justifica essa decisão é o de Nível 2 (Contêineres), que mostra o Serviço de Telemetria como um contêiner separado, conectado ao Barramento de Eventos por Kafka Protocol (400 msg/s), sem nenhuma dependência direta com o Serviço de Cartões e Recarga ou com a Base de Cartões e Saldos.
+
 ### 4. Como o repasse mensal é recalculado se uma regra de tarifa mudou no meio do mês?
 
 Cada viagem validada gera um evento imutável, o ValidacaoRealizada, que chega ao Consumidor de Eventos de Viagem e é gravado no Armazenamento de Eventos, sem sobrescrita, só acréscimo. Esse evento é a fonte de verdade da viagem: ele não muda depois, só pode ser reinterpretado.
@@ -39,3 +54,25 @@ Os ADRs que justificam essas decisões são:
 O diagrama que justifica essa decisão é o de nível 3, que mapeia visualmente as fronteiras de comunicação entre o Consumidor de Eventos de Viagem, o Núcleo de Fechamento, o Registro de Regras Tarifárias, o Filtro Consolidador por Operadora e o Armazenamento de Fechamento Mensal, dentro do Serviço de Repasse e Conciliação
 
 ### 5. Como o histórico de viagens de uma pessoa é apagado quando ela pede, sem quebrar a conciliação financeira?
+
+O histórico de viagens de uma pessoa é apagado sem quebrar a conciliação financeira porque a arquitetura separa, desde a origem, os dados pessoais identificadores dos fatos financeiros da viagem.
+
+Quando uma validação é registrada, o evento de viagem gravado no Armazenamento de Eventos (visível no diagrama C4 de contêineres) contém apenas um identificador pseudonimizado do passageiro — não o nome, CPF ou número do cartão diretamente. O vínculo entre esse identificador pseudonimizado e os dados pessoais reais (nome, CPF, e-mail, número do cartão) fica armazenado separadamente, no Serviço de Cartões e Recarga e na Base de Cartões e Saldos.
+
+Essa separação segue o princípio de pseudonimização: o evento de viagem registra "o passageiro com ID abc123 embarcou no ônibus X às 07:32 do dia 15, tarifa R$4,40", mas não registra quem é abc123. Para saber quem é essa pessoa, é preciso consultar a tabela de vínculo no Serviço de Cartões.
+
+Quando o passageiro solicita a exclusão dos seus dados pessoais (direito garantido pela LGPD), o sistema executa as seguintes etapas:
+
+1. Remove ou anonimiza o vínculo pessoal na Base de Cartões e Saldos: o registro que liga o identificador pseudonimizado ao nome, CPF e demais dados pessoais é apagado ou substituído por dados irreversíveis (anonimização).
+
+2. Mantém os fatos financeiros intactos no Armazenamento de Eventos: os eventos de viagem permanecem com o identificador pseudonimizado (abc123), mas esse identificador agora não leva a ninguém — é um dado órfão, sem possibilidade de reidentificação.
+
+3. A conciliação financeira não é afetada, pois o Serviço de Repasse e Conciliação (diagrama C4 de componentes) trabalha com os eventos de viagem e as regras tarifárias, não com os dados pessoais do passageiro. O Núcleo de Fechamento reproduz eventos, aplica tarifa vigente e consolida por operadora — tudo isso usa apenas o identificador pseudonimizado, o horário, o veículo e o valor da tarifa. Nenhuma dessas informações é perdida com a exclusão dos dados pessoais.
+
+4. Contestações dentro do prazo de 30 dias continuam possíveis: a API de Conciliação e Contestação expõe os registros financeiros com a versão de regra aplicada. Se o passageiro já pediu exclusão, o registro financeiro continua existindo para fins de auditoria — apenas não é mais possível identificar a pessoa.
+
+Os ADRs que justificam essas decisões são:
+- 0003 — Define eventos assíncronos persistentes como padrão de integração, incluindo eventos de viagem como fatos imutáveis. A imutabilidade dos eventos é compatível com a anonimização porque o evento em si não é alterado — apenas o vínculo externo é removido.
+- 0004 — Separa o backend por subdomínios, garantindo que o Serviço de Cartões (dono dos dados pessoais) e o Serviço de Repasse (dono dos dados financeiros) tenham propriedade de dados independentes.
+
+Os diagramas que justificam essa decisão são os de Nível 2 (Contêineres), que mostra a separação entre a Base de Cartões e Saldos (onde vivem os dados pessoais) e o Armazenamento de Eventos (onde ficam os fatos financeiros pseudonimizados), e o de Nível 3 (Componentes), que mostra que o Armazenamento de Eventos de Viagem armazena dados com "id pseudonimizado", confirmando que o fluxo financeiro inteiro opera sem dados pessoais diretos.
