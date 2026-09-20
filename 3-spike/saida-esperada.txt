@@ -1,0 +1,49 @@
+SPIKE: valida a ADR 0002 (saldo autoritario e reconciliacao offline)
+
+Tarifa: R$ 5.00 | Saldos iniciais: {'cartao-A': '6.00', 'cartao-B': '10.00', 'cartao-C': '20.00'}
+
+Fase 1 - os dois onibus estao sem conexao 4G, decidindo so com o saldo local.
+
+[offline] onibus-101 minuto   0: cartao cartao-A -> aceita
+[offline] onibus-101 minuto   3: cartao cartao-B -> aceita
+[offline] onibus-205 minuto   4: cartao cartao-A -> aceita
+[offline] onibus-101 minuto  10: cartao cartao-C -> aceita
+[offline] onibus-205 minuto  40: cartao cartao-C -> aceita
+
+Fase 2 - enquanto os onibus seguem offline, uma recarga chega pelo app (canal online, direto no backend).
+  -> [RECARGA] cartao-B +R$ 20.00 | saldo: R$ 30.00
+
+Fase 3 - os onibus reconectam e enviam os lotes ao backend.
+
+--- reconciliando lote onibus-101 (3 evento(s)) ---
+  -> [DEBITO] cartao-A -R$ 5.00 | saldo: R$ 1.00 | ok
+  -> [DEBITO] cartao-B -R$ 5.00 | saldo: R$ 25.00 | ok
+  -> [DEBITO] cartao-C -R$ 5.00 | saldo: R$ 15.00 | ok
+
+--- reconciliando lote onibus-205 (2 evento(s)) ---
+  -> [DEBITO] cartao-A -R$ 5.00 | saldo: R$ -4.00 | conflito, saldo negativo
+  -> [DEBITO] cartao-C -R$ 5.00 | saldo: R$ 10.00 | ok
+
+Fase 4 - reentrega de rede: o mesmo lote e a mesma recarga chegam de novo.
+
+--- reconciliando lote onibus-101 (reenviado) (3 evento(s)) ---
+  -> [IGNORADA] onibus-101-1 ja processado (reentrega de rede)
+  -> [IGNORADA] onibus-101-2 ja processado (reentrega de rede)
+  -> [IGNORADA] onibus-101-3 ja processado (reentrega de rede)
+  -> [IGNORADA] recarga recarga-app-b-1 ja processada (reentrega de rede)
+
+Fase 5 - o backend cruza os eventos aceitos por horario, entre onibus diferentes.
+Alertas de uso duplicado:
+ - cartao cartao-A: aceito em onibus-101 no minuto 0 e em onibus-205 no minuto 4 (intervalo de 4 min) -- fisicamente impossivel
+
+RELATORIO FINAL
+ - cartao-A: R$ -4.00 <- negativo
+ - cartao-B: R$ 25.00
+ - cartao-C: R$ 10.00
+
+Transacoes unicas processadas: 6
+Conflitos de saldo negativo: ['cartao-A ficou negativo em onibus-205-1 (onibus-205)']
+Cartoes bloqueados: ['cartao-A']
+
+Fase 6 - proxima conexao: onibus recebem a lista de bloqueio e recusam o cartao.
+[offline] onibus-101 minuto 100: cartao cartao-A -> recusada
