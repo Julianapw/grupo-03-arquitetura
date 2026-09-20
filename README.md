@@ -48,3 +48,15 @@ A divisão em 5 times também é um fator relevante: a arquitetura precisa permi
 3. Como a telemetria escala no pico sem derrubar o resto do sistema?
 4. Como o repasse mensal é recalculado se a regra de tarifa mudou no meio do mês?
 5. Como o histórico de viagens de uma pessoa é apagado quando ela pede, sem quebrar a conciliação financeira?
+
+## Referências Bibliográficas e Fontes Primárias
+
+1. **ABREU, Douglas H. S.** *Estilos Arquiteturais de Software: guia de consulta*. Edição do Autor, 2026.
+2. **APACHE SOFTWARE FOUNDATION.** *Apache Kafka Documentation: Design and Architecture*. Apache Software Foundation, 2024. Disponível em: <https://kafka.apache.org/documentation/#design>. Acesso em: 19 set. 2026.
+3. **BROWN, Simon.** *Software Architecture for Developers: Volume 1 - Visualise, document and explore your software architecture*. Leanpub, 2018.
+4. **EVANS, Eric.** *Domain-Driven Design: Tackling Complexity in the Heart of Software*. Boston: Addison-Wesley Professional, 2003.
+5. **FOWLER, Martin.** *Patterns of Enterprise Application Architecture*. Boston: Addison-Wesley Professional, 2002.
+6. **GO DEVELOPMENT TEAM.** *Effective Go: Concurrency*. Google, 2024. Disponível em: <https://go.dev/doc/effective_go#concurrency>. Acesso em: 19 set. 2026.
+7. **KLEPPMANN, Martin.** *Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems*. Sebastopol: O'Reilly Media, 2017.
+8. **ORACLE.** *Java Platform, Standard Edition Documentation*. Oracle Corporation, 2024. Disponível em: <https://docs.oracle.com/en/java/>. Acesso em: 19 set. 2026.
+9. **POSTGRESQL GLOBAL DEVELOPMENT GROUP.** *PostgreSQL 16 Documentation: Chapter 13. Concurrency Control*. PostgreSQL, 2024. Disponível em: <https://www.postgresql.org/docs/current/mvcc.html>. Acesso em: 19 set. 2026.
