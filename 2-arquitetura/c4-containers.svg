@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1840" viewBox="0 0 1320 1840">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#222"/></marker></defs>
+<rect width="1320" height="1840" fill="white"/>
+<rect x="535" y="50" width="760" height="1320" fill="#f0fbfa" stroke="#70d7cd"/>
+<text x="915.0" y="67" text-anchor="middle" font-family="Arial" font-size="14">Nuvem Pública (Consórcio)</text>
+<rect x="290" y="1510" width="735" height="285" fill="#fcf4ff" stroke="#dda7ee"/>
+<text x="657.5" y="1527" text-anchor="middle" font-family="Arial" font-size="14">Sistemas e Atores Externos</text>
+<rect x="105" y="355" width="345" height="600" fill="#fffaf0" stroke="#dbbb7a"/>
+<text x="277.5" y="372" text-anchor="middle" font-family="Arial" font-size="14">Borda (Dentro do Ônibus)</text>
+<path d="M645,1600 L645,1820 L20,1820 L20,8 L945,8 L945,90" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M400,1755 L400,1800 L55,1800 L55,28 L900,28 L900,90" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M880,260 L880,300 L665,300 L665,355" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M925,260 L925,355" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M970,260 L970,300 L1185,300 L1185,355" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M625,525 L625,625 L665,625 L665,720" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M700,525 L700,685 L885,685 L885,720" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M880,525 L880,585 L925,585 L925,720" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M1185,525 L1185,685 L975,685 L975,720" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M925,870 L925,965" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M955,1135 L955,1155 L990,1155 L990,1180" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M885,1135 L885,1440 L900,1440 L900,1570" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M315,1630 L85,1630 L85,500 L190,500" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M375,1570 L375,850 L360,850" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M275,745 L275,590" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M360,790 L485,790 L485,65 L880,65 L880,90" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M840,790 L780,790 L780,330 L705,330 L705,355" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M1010,790 L1050,790 L1050,555 L960,555 L960,525" fill="none" stroke="#222" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="840" y="90" width="170" height="170" fill="#438DD5" stroke="#3C7FC0"/>
+<foreignObject x="850" y="90" width="150" height="170"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>API Gateway</b><br/>[Container: Kong / AWS]<br/>Ponto de entrada, autenticação e roteamento.</div></div></foreignObject>
+<rect x="580" y="355" width="170" height="170" fill="#438DD5" stroke="#3C7FC0"/>
+<foreignObject x="590" y="355" width="150" height="170"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Serviço de Cartões e Recarga</b><br/>[Container: Go / Java]<br/>Saldo autoritativo.</div></div></foreignObject>
+<rect x="840" y="355" width="170" height="170" fill="#438DD5" stroke="#3C7FC0"/>
+<foreignObject x="850" y="355" width="150" height="170"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Serviço de Sincronização</b><br/>[Container: Go / Node.js]<br/>Processa lotes de viagens.</div></div></foreignObject>
+<rect x="1100" y="355" width="170" height="170" fill="#438DD5" stroke="#3C7FC0"/>
+<foreignObject x="1110" y="355" width="150" height="170"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Serviço de Telemetria</b><br/>[Container: Go / Python]<br/>Ingestão GPS (400 msg/s).</div></div></foreignObject>
+<path d="M590,732 A75.0,12 0 0 1 740,732 L740,883 A75.0,12 0 0 1 590,883 Z" fill="#2B72B5" stroke="#25639E"/>
+<ellipse cx="665.0" cy="732" rx="75.0" ry="12" fill="#2B72B5" stroke="#25639E"/>
+<foreignObject x="600" y="745" width="130" height="137"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Base de Cartões e Saldos</b><br/>[Database: PostgreSQL]<br/>Saldos autoritativos.</div></div></foreignObject>
+<rect x="840" y="720" width="170" height="150" fill="#438DD5" stroke="#3C7FC0"/>
+<foreignObject x="850" y="720" width="150" height="150"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Barramento de Eventos</b><br/>[Container: Apache Kafka]<br/>Fila de eventos assíncrona.</div></div></foreignObject>
+<rect x="840" y="965" width="170" height="170" fill="#438DD5" stroke="#3C7FC0"/>
+<foreignObject x="850" y="965" width="150" height="170"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Serviço de Repasse e Conciliação</b><br/>[Container: Java / C#]<br/>Gera arquivos de repasse.</div></div></foreignObject>
+<path d="M905,1192 A85.0,12 0 0 1 1075,1192 L1075,1333 A85.0,12 0 0 1 905,1333 Z" fill="#2B72B5" stroke="#25639E"/>
+<ellipse cx="990.0" cy="1192" rx="85.0" ry="12" fill="#2B72B5" stroke="#25639E"/>
+<foreignObject x="915" y="1205" width="150" height="127"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Armazenamento de Eventos</b><br/>[Database: EventStore]<br/>Event Sourcing imutável.</div></div></foreignObject>
+<rect x="315" y="1570" width="170" height="185" fill="#999999" stroke="#666666"/>
+<foreignObject x="325" y="1570" width="150" height="185"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Validador Embarcado</b><br/>[Software System]<br/>Valida passagens offline e sincroniza.</div></div></foreignObject>
+<rect x="560" y="1600" width="170" height="170" fill="#08427B" stroke="#073B6F"/>
+<foreignObject x="570" y="1600" width="150" height="170"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Passageiro</b><br/>[Person]<br/>Consulta saldo e recarrega via app.</div></div></foreignObject>
+<rect x="815" y="1570" width="170" height="185" fill="#999999" stroke="#666666"/>
+<foreignObject x="825" y="1570" width="150" height="185"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Banco / Operadora</b><br/>[Software System]<br/>Adquirente e liquidação financeira.</div></div></foreignObject>
+<path d="M190,422 A85.0,12 0 0 1 360,422 L360,578 A85.0,12 0 0 1 190,578 Z" fill="#2B72B5" stroke="#25639E"/>
+<ellipse cx="275.0" cy="422" rx="85.0" ry="12" fill="#2B72B5" stroke="#25639E"/>
+<foreignObject x="200" y="435" width="150" height="142"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Base Local do Validador</b><br/>[Database: SQLite]<br/>Saldo, regras e viagens pendentes.</div></div></foreignObject>
+<rect x="190" y="745" width="170" height="170" fill="#438DD5" stroke="#3C7FC0"/>
+<foreignObject x="200" y="745" width="150" height="170"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div><b>Agente de Sincronização</b><br/>[Container: Aplicação embarcada]<br/>Reenvia pendências quando a rede volta.</div></div></foreignObject>
+<foreignObject x="15.0" y="1428" width="200" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">HTTPS: Compra recarga</span></div></foreignObject>
+<foreignObject x="185.0" y="1388" width="250" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">HTTPS/gRPC: Sincroniza lotes</span></div></foreignObject>
+<foreignObject x="632.5" y="303" width="65" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">HTTPS</span></div></foreignObject>
+<foreignObject x="892.5" y="293" width="65" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">HTTPS</span></div></foreignObject>
+<foreignObject x="1152.5" y="303" width="65" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">HTTPS</span></div></foreignObject>
+<foreignObject x="605.0" y="628" width="50" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">SQL</span></div></foreignObject>
+<foreignObject x="667.5" y="633" width="115" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Kafka Protocol</span></div></foreignObject>
+<foreignObject x="867.5" y="613" width="115" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Kafka Protocol</span></div></foreignObject>
+<foreignObject x="1075.0" y="583" width="200" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Kafka Protocol: Ingestão 400 msg/s</span></div></foreignObject>
+<foreignObject x="855.0" y="896" width="140" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Consome eventos</span></div></foreignObject>
+<foreignObject x="995.0" y="1133" width="110" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Append-Only</span></div></foreignObject>
+<foreignObject x="837.5" y="1443" width="125" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">SFTP / HTTPS</span></div></foreignObject>
+<foreignObject x="95.0" y="1078" width="200" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">SQL: Consulta saldo e registra viagem</span></div></foreignObject>
+<foreignObject x="297.5" y="1178" width="165" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Chamada local: Inicia envio</span></div></foreignObject>
+<foreignObject x="175.0" y="643" width="200" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">SQL: Lê pendências e salva confirmações</span></div></foreignObject>
+<foreignObject x="280.0" y="208" width="220" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">HTTPS/gRPC: Envia lote e recebe confirmação</span></div></foreignObject>
+<foreignObject x="727.5" y="543" width="105" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Consome validações: Reconcilia saldo</span></div></foreignObject>
+<foreignObject x="1057.5" y="768" width="155" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">Consome validações: Verifica conflitos</span></div></foreignObject>
+</svg>

@@ -1,0 +1,70 @@
+graph TB
+%% Estilos visuais do C4 Model
+classDef person fill:#08427B,stroke:#073B6F,color:#fff;
+classDef external fill:#999999,stroke:#666666,color:#fff;
+classDef container fill:#438DD5,stroke:#3C7FC0,color:#fff;
+classDef database fill:#2B72B5,stroke:#25639E,color:#fff;
+
+%% Atores e Sistemas Externos (Fora da Nuvem)
+subgraph Sistemas_Externos ["Sistemas e Atores Externos"]
+    passageiro["<b>Passageiro</b><br/>[Person]<br/>Consulta saldo e recarrega via app."]:::person
+    validador["<b>Validador Embarcado</b><br/>[Software System]<br/>Valida passagens offline e sincroniza."]:::external
+    banco["<b>Banco / Operadora</b><br/>[Software System]<br/>Adquirente e liquidação financeira."]:::external
+end
+
+%% Fronteira da Nuvem Pública
+subgraph cloud ["Nuvem Pública (Consórcio)"]
+    
+    %% Topo da Nuvem
+    api_gateway["<b>API Gateway</b><br/>[Container: Kong / AWS]<br/>Ponto de entrada, autenticação e roteamento."]:::container
+
+    %% Camada de Processamento
+    srv_recarga["<b>Serviço de Cartões e Recarga</b><br/>[Container: Go / Java]<br/>Saldo autoritativo."]:::container
+    srv_validacao["<b>Serviço de Sincronização</b><br/>[Container: Go / Node.js]<br/>Processa lotes de viagens."]:::container
+    srv_telemetria["<b>Serviço de Telemetria</b><br/>[Container: Go / Python]<br/>Ingestão GPS (400 msg/s)."]:::container
+
+    %% Mensageria e Dados Superiores
+    db_cartoes[("<b>Base de Cartões e Saldos</b><br/>[Database: PostgreSQL]<br/>Saldos autoritativos.")]:::database
+    event_bus["<b>Barramento de Eventos</b><br/>[Container: Apache Kafka]<br/>Fila de eventos assíncrona."]:::container
+
+    %% Processamento Posterior (Repasse)
+    srv_repasse["<b>Serviço de Repasse e Conciliação</b><br/>[Container: Java / C#]<br/>Gera arquivos de repasse."]:::container
+
+    %% Dados Inferiores
+    db_events[("<b>Armazenamento de Eventos</b><br/>[Database: EventStore]<br/>Event Sourcing imutável.")]:::database
+end
+
+%% Conexões Externas -> API Gateway
+passageiro -->|HTTPS: Compra recarga| api_gateway
+validador -->|HTTPS/gRPC: Sincroniza lotes| api_gateway
+
+%% API Gateway -> Serviços
+api_gateway -->|HTTPS| srv_recarga
+api_gateway -->|HTTPS| srv_validacao
+api_gateway -->|HTTPS| srv_telemetria
+
+%% Serviços -> Bancos e Barramento
+srv_recarga -->|SQL| db_cartoes
+srv_recarga -->|Kafka Protocol| event_bus
+srv_validacao -->|Kafka Protocol| event_bus
+srv_telemetria -->|Kafka Protocol: Ingestão 400 msg/s| event_bus
+
+%% Barramento -> Repasse
+event_bus -->|Consome eventos| srv_repasse
+
+%% Repasse -> EventStore e Banco Externo
+srv_repasse -->|Append-Only| db_events
+srv_repasse -->|SFTP / HTTPS| banco
+
+%% Complemento do Kauê — Borda e consumo dos eventos
+subgraph Borda ["Borda (Dentro do Ônibus)"]
+    db_local[("<b>Base Local do Validador</b><br/>[Database: SQLite]<br/>Saldo, regras e viagens pendentes.")]:::database
+    agente_sync["<b>Agente de Sincronização</b><br/>[Container: Aplicação embarcada]<br/>Reenvia pendências quando a rede volta."]:::container
+end
+
+validador -->|SQL: Consulta saldo e registra viagem| db_local
+validador -->|Chamada local: Inicia envio| agente_sync
+agente_sync -->|SQL: Lê pendências e salva confirmações| db_local
+agente_sync -->|HTTPS/gRPC: Envia lote e recebe confirmação| api_gateway
+event_bus -->|Consome validações: Reconcilia saldo| srv_recarga
+event_bus -->|Consome validações: Verifica conflitos| srv_validacao
