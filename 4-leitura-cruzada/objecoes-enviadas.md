@@ -29,8 +29,16 @@ Isso preserva imutabilidade, auditoria, rastreabilidade e conformidade com a LGP
 
 ## ADR 0004
 ### 1 - O trecho
+
+ADR 0004, campo Decisão: "As atualizações ocorrerão obrigatoriamente por implantação em ondas (Canary por Célula): uma cidade piloto recebe a versão nova, permanece sob monitoração sintética por 60 minutos e apenas então a versão é promovida para as demais células." E, no campo Alternativas consideradas: "Cluster Kubernetes unificado com Service Mesh complexo: descartada por demandar esforço contínuo de sustentação que consumiria metade do time de 25 desenvolvedores."
+
 ### 2 - O argumento
+
+A ADR rejeita a "Atualização simultânea global (Big Bang)" por violar a contenção de raio de impacto do Envelope D, mas a decisão escrita promove a versão nova para todas as cidades restantes de uma vez só, depois de validar em uma única cidade piloto. Isso é Big Bang para cada cidade que não é a piloto: se o defeito só aparece sob uma condição que a piloto não tinha (carga, fuso horário, ou um plugin de regra tarifária específico de outro município, previsto no Microkernel da própria arquitetura), ele atinge todas as demais células ao mesmo tempo, exatamente o cenário que a alternativa descartada deveria evitar. O livro-referência do próprio grupo, no ADR de exemplo do capítulo de arquitetura celular, resolve isso com implantação em ondas de uma célula por vez, com trinta minutos de observação entre cada uma, não piloto-depois-todo-o-resto. Além disso, o ADR descarta a malha de serviços pelo custo de sustentação, mas não estima o custo de construir e manter, do zero, um motor de canary multi-tenant com monitoração sintética por célula e corte automático em 60 minutos, sem qualquer procedimento manual. Sem essa conta, não dá pra saber se a alternativa escolhida é de fato mais barata do que a rejeitada.
+
 ### 3 - A saída
+
+Implantar em ondas sucessivas de tamanho crescente (por exemplo, 1 cidade, depois 3, depois 10, depois o restante), cada onda com sua própria janela de observação sintética, avançando para a próxima só se a anterior passar, o que mantém o raio de impacto de uma implantação defeituosa contido em uma fração pequena da base a cada vez. A primeira onda deve incluir cidades com plugins tarifários distintos entre si, não uma única cidade fixa, para cobrir a diversidade de configuração antes de promover para o restante. Para não repetir o custo de sustentação que a malha de serviços teria, usar uma ferramenta de entrega progressiva já existente para orquestrar as ondas, em vez de construir esse motor internamente.
 
 ## ADR 0005
 ### 1 - O trecho
