@@ -40,7 +40,29 @@ A ADR rejeita a "Atualização simultânea global (Big Bang)" por violar a conte
 
 Implantar em ondas sucessivas de tamanho crescente (por exemplo, 1 cidade, depois 3, depois 10, depois o restante), cada onda com sua própria janela de observação sintética, avançando para a próxima só se a anterior passar, o que mantém o raio de impacto de uma implantação defeituosa contido em uma fração pequena da base a cada vez. A primeira onda deve incluir cidades com plugins tarifários distintos entre si, não uma única cidade fixa, para cobrir a diversidade de configuração antes de promover para o restante. Para não repetir o custo de sustentação que a malha de serviços teria, usar uma ferramenta de entrega progressiva já existente para orquestrar as ondas, em vez de construir esse motor internamente.
 
-## ADR 0005
+## ADR 0005 
 ### 1 - O trecho
+
+ADR 0005: "Controle de Saldo Híbrido (Dual-ledger): O cartão físico armazena seu saldo em setor seguro cifrado. Ao validar offline, o dispositivo debita o saldo local do cartão, gera uma transação assinada com contador sequencial monotônico e armazena o evento em fila persistente local."
+
+E: "Reconciliação e Resolução de Conflitos no Servidor: Ao recuperar o sinal 4G, o validador descarrega as transações em lote."
+
 ### 2 - O argumento
+
+A decisão de permitir operação offline é coerente com o requisito de funcionamento por até quatro horas sem 4G e com o limite de 300 ms para a liberação da catraca. Porém, o modelo Dual-ledger cria duas representações de saldo que podem divergir: o saldo físico armazenado no cartão e o saldo mantido no sistema central.
+
+Essa divergência fica mais evidente quando uma recarga é realizada pelo aplicativo enquanto o ônibus está offline. O próprio documento afirma que a recarga é registrada imediatamente na conta central e que, caso o ônibus ainda não tenha recebido essa informação, pode utilizar o saldo físico residual ou até uma modalidade de "saldo de confiança".
+
+O problema é que o ADR não define de forma suficientemente explícita qual saldo é a fonte autoritária após a reconciliação, nem estabelece uma regra clara para conflitos entre créditos centrais, débitos offline e o saldo armazenado fisicamente no cartão. Com vários validadores desconectados simultaneamente, essa indefinição pode aumentar a complexidade da reconciliação e produzir estados divergentes.
+
+Além disso, detectar posteriormente usos incompatíveis e bloquear o cartão na próxima sincronização reduz o impacto futuro da fraude, mas não resolve por si só qual operação financeira deve prevalecer quando os registros conflitantes forem conciliados.
+
 ### 3 - A saída
+
+Manter a autonomia offline do validador, mas estabelecer explicitamente o saldo central da célula como fonte autoritária após a sincronização. O saldo presente no cartão deve funcionar como uma representação local para permitir a validação durante períodos sem conectividade, e não como uma segunda fonte definitiva de verdade.
+
+Cada operação offline deve possuir identificador único, contador monotônico e assinatura, como já proposto pelo ADR. Quando a conexão retornar, o servidor recebe essas operações de forma idempotente, verifica a sequência dos eventos e reconcilia os débitos offline com as recargas registradas no sistema central.
+
+Em caso de conflito, o servidor mantém o histórico das operações recebidas, calcula o saldo autoritário resultante e gera os ajustes necessários. O cartão recebe o estado reconciliado em uma sincronização posterior.
+
+Dessa forma, preserva-se a principal vantagem do ADR 0005 — permitir validações rápidas mesmo durante quatro horas sem 4G — mas fica explícito quem possui a autoridade sobre o saldo depois da reconciliação, reduzindo ambiguidades no modelo Dual-ledger e facilitando o tratamento de divergências e fraudes.
