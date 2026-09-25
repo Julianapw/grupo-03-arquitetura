@@ -1,7 +1,19 @@
-## ADR 0001
+## ADR 0001 — Adotar arquitetura celular combinada com monolito modular e serverless
 ### 1 - O trecho
+
+ADR 0001, campo Decisão, item 2: "Monolito Modular dentro de cada célula para concentrar validação, recargas e repasse financeiro em um único processo com módulos isolados e banco relacional por esquemas". Trecho do arquivo `2-Arquitetura/Documento de Arquitetura de Software - SIMUB.pdf`, seção 3, página 10.
+
 ### 2 - O argumento
+
+A divisão em células faz sentido para impedir que uma cidade afete a outra. A dúvida é como o repasse vai funcionar junto das recargas e da validação no mesmo processo. Na resposta à pergunta 4, página 16, o grupo diz que vai reprocessar todas as viagens do mês para recalcular o repasse. Se isso acontecer durante um pico de recargas ou enquanto os ônibus enviam viagens acumuladas, essas tarefas podem disputar memória, processamento e acesso ao banco.
+
+O ADR não explica como essa disputa será controlada. Separar os módulos organiza o código, mas eles continuam usando os recursos do mesmo processo. Isso pesa no Envelope D, que atende cidades de tamanhos diferentes: uma cidade maior pode precisar aumentar toda a aplicação só para dar conta do fechamento mensal. O Serverless atende às consultas dos passageiros, então não resolve esse problema. A catraca continua funcionando offline, mas as recargas e a sincronização podem ficar mais lentas.
+
 ### 3 - A saída
+
+Manter as células e o monolito modular, mas executar o repasse em um processo separado, usando as mesmas regras do projeto. Assim, seria possível aumentar a capacidade do repasse sem aumentar toda a aplicação. Como o banco ainda seria compartilhado, o cálculo deveria trabalhar com lotes menores e um limite de conexões.
+
+Antes de definir esses limites, testar o fechamento junto de um pico de recargas e envio de viagens. Haveria mais um processo para a equipe cuidar, mas sem precisar dividir todo o sistema em microsserviços para os 25 desenvolvedores manterem.
 
 
 ## ADR 0002 — Isolar modelo de escrita por eventos e pseudonimização de dados pessoais
