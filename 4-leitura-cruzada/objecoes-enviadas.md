@@ -34,10 +34,22 @@ Se uma tarifa mudar no passado, o sistema reprocessará em lote apenas os evento
 Isso preserva imutabilidade, auditoria, rastreabilidade e conformidade com a LGPD. Os snapshots deixam de ser um requisito para a correção do fechamento mensal e passam a ser apenas uma otimização opcional para acelerar a reprodução dos eventos. Dessa forma, reduzimos a complexidade de sustentação para os 25 desenvolvedores sem substituir a decisão de manter os fatos financeiros como eventos imutáveis.
 
 
-## ADR 0003
+## ADR 0003 — Isolar integrações bancárias e sistemas legados com camada anticorrupção
 ### 1 - O trecho
+
+ADR 0003, campo Decisão: "Isolar os serviços externos por meio da Arquitetura Hexagonal (Ports and Adapters) configurando Camadas Anticorrupção (ACL) explícitas nas bordas. Nenhuma estrutura externa contamina o domínio interno. Falhas externas serão amortecidas por Circuit Breakers e filas de reprocessamento (Dead Letter Queues), enquanto remessas bancárias noturnas serão orquestradas por adaptadores assíncronos desacoplados das regras de validação." E, no campo Alternativas consideradas: "Barramento Corporativo Central (ESB/SOA): Descartada por criar um ponto único de falha institucional e acoplar a lógica de integração no meio de transporte (violando a diretriz de smart endpoints)."
+
 ### 2 - O argumento
+
+A decisão de isolar integrações por meio de Camadas Anticorrupção (ACL) e adaptadores específicos nas bordas protege o domínio, mas traz a responsabilidade de traduzir layouts proprietários e protocolos legados (como SFTP noturno) para dentro do repositório da aplicação. O Envelope D limita a equipe a 25 desenvolvedores para sustentar uma plataforma vendida para múltiplos municípios. Cada nova prefeitura ou consórcio adicionado à carteira trará seus próprios sistemas legados e regras de compensação.
+
+Ao internalizar o desenvolvimento e a manutenção desses adaptadores e de suas respectivas filas de reprocessamento (Dead Letter Queues), a equipe de 25 engenheiros corre o risco de se tornar uma "fábrica de integrações". O custo de sustentar dezenas de conectores paralelos, monitorando falhas em sistemas de terceiros de cada cidade, sobrecarregará o time e dificultará a evolução do *core* do produto. A decisão rejeita um ESB por ser um ponto único de falha, mas ignora soluções modernas de integração fora do código da aplicação que não ferem a diretriz de *smart endpoints*.
+
 ### 3 - A saída
+
+Em vez de construir e manter adaptadores específicos nas bordas da própria aplicação, adotar uma abordagem *API First* com um modelo canônico estrito. A plataforma expõe APIs REST e Webhooks padronizados, além de fornecer formatos de arquivo padrão para exportação.
+
+A responsabilidade de traduzir esse formato canônico para os leiautes proprietários das prefeituras ou comunicar via SFTP noturno seria delegada para um Middleware de Integração externo (como Apache Camel, ferramentas iPaaS ou até scripts *serverless* independentes). Esse componente agiria como um tradutor fora da aplicação principal, operado preferencialmente por parceiros de implantação local. Dessa forma, a aplicação principal permanece imune às especificidades de cada cliente, garantindo que a equipe de 25 desenvolvedores foque exclusivamente na evolução da bilhetagem, viabilizando a venda do produto para novas cidades sem inchar a base de código.
 
 ## ADR 0004
 ### 1 - O trecho
