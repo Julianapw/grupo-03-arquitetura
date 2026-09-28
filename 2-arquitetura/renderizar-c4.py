@@ -10,11 +10,15 @@ nodes = {m[0]: (m[1], m[2]) for m in re.findall(r'^\s*(\w+)\[\(?"(.*?)"\)?\]:::(
 edges = {(a, b): label for a, label, b in re.findall(r'^(\w+) -->\|(.*?)\| (\w+)', source, re.M)}
 positions = {
     'api_gateway': (840,90,170,170),
-    'srv_recarga': (580,355,170,170),
-    'srv_validacao': (840,355,170,170),
-    'srv_telemetria': (1100,355,170,170),
-    'db_cartoes': (590,720,150,175),
-    'event_bus': (840,720,170,150),
+    'srv_recarga_a': (555,355,155,170),
+    'srv_validacao_a': (735,355,155,170),
+    'srv_recarga_b': (915,355,155,170),
+    'srv_validacao_b': (1095,355,155,170),
+    'srv_telemetria': (1100,610,170,170),
+    'db_cartoes_a': (555,610,150,160),
+    'db_cartoes_b': (915,610,150,160),
+    'db_event_log': (735,650,155,170),
+    'event_bus': (930,850,170,150),
     'srv_repasse': (840,965,170,170),
     'db_events': (905,1180,170,165),
     'validador': (315,1570,170,185),
@@ -27,22 +31,30 @@ positions = {
 routes = [
  ('passageiro','api_gateway',[(645,1600),(645,1820),(20,1820),(20,8),(945,8),(945,90)],(115,1450,200)),
  ('validador','api_gateway',[(400,1755),(400,1800),(55,1800),(55,28),(900,28),(900,90)],(310,1410,250)),
- ('api_gateway','srv_recarga',[(880,260),(880,300),(665,300),(665,355)],(665,325,65)),
- ('api_gateway','srv_validacao',[(925,260),(925,355)],(925,315,65)),
- ('api_gateway','srv_telemetria',[(970,260),(970,300),(1185,300),(1185,355)],(1185,325,65)),
- ('srv_recarga','db_cartoes',[(625,525),(625,625),(665,625),(665,720)],(630,650,50)),
- ('srv_recarga','event_bus',[(700,525),(700,685),(885,685),(885,720)],(725,655,115)),
- ('srv_validacao','event_bus',[(880,525),(880,585),(925,585),(925,720)],(925,635,115)),
- ('srv_telemetria','event_bus',[(1185,525),(1185,685),(975,685),(975,720)],(1175,605,200)),
- ('event_bus','srv_repasse',[(925,870),(925,965)],(925,918,140)),
+ ('api_gateway','srv_recarga_a',[(880,260),(880,300),(630,300),(630,355)],(630,325,95)),
+ ('api_gateway','srv_validacao_a',[(900,260),(900,315),(810,315),(810,355)],(810,325,95)),
+ ('api_gateway','srv_recarga_b',[(940,260),(940,300),(990,300),(990,355)],(990,325,95)),
+ ('api_gateway','srv_validacao_b',[(960,260),(960,315),(1170,315),(1170,355)],(1170,325,95)),
+ ('api_gateway','srv_telemetria',[(970,260),(970,550),(1185,550),(1185,610)],(1185,570,95)),
+ ('srv_recarga_a','db_cartoes_a',[(630,525),(630,610)],(630,565,65)),
+ ('srv_recarga_b','db_cartoes_b',[(990,525),(990,610)],(990,565,65)),
+ ('srv_validacao_a','db_event_log',[(810,525),(810,650)],(840,585,90)),
+ ('srv_validacao_b','db_event_log',[(1170,525),(1170,590),(890,590),(890,650)],(1040,570,100)),
+ ('db_event_log','event_bus',[(815,820),(815,825),(1015,825),(1015,850)],(915,810,165)),
+ ('srv_recarga_a','event_bus',[(710,525),(710,800),(970,800),(970,850)],(780,790,110)),
+ ('srv_recarga_b','event_bus',[(990,525),(990,850)],(1030,690,80)),
+ ('srv_telemetria','event_bus',[(1185,790),(1185,825),(1100,825),(1100,850)],(1150,810,100)),
+ ('event_bus','srv_repasse',[(1015,1000),(1015,1020),(925,1020),(925,965)],(965,1015,120)),
  ('srv_repasse','db_events',[(955,1135),(955,1155),(990,1155),(990,1180)],(1050,1155,110)),
  ('srv_repasse','banco',[(885,1135),(885,1440),(900,1440),(900,1570)],(900,1465,125)),
  ('validador','db_local',[(315,1630),(85,1630),(85,500),(190,500)],(195,1100,200)),
  ('validador','agente_sync',[(375,1570),(375,850),(360,850)],(380,1200,165)),
  ('agente_sync','db_local',[(275,745),(275,590)],(275,665,200)),
  ('agente_sync','api_gateway',[(360,790),(485,790),(485,65),(880,65),(880,90)],(390,230,220)),
- ('event_bus','srv_recarga',[(840,790),(780,790),(780,330),(705,330),(705,355)],(780,960,125)),
- ('event_bus','srv_validacao',[(1010,790),(1050,790),(1050,555),(960,555),(960,525)],(1135,790,155)),
+ ('event_bus','srv_recarga_a',[(930,850),(530,850),(530,550),(630,550),(630,525)],(560,810,120)),
+ ('event_bus','srv_validacao_a',[(950,850),(700,850),(700,550),(810,550),(810,525)],(760,810,120)),
+ ('event_bus','srv_recarga_b',[(1050,850),(1050,550),(990,550),(990,525)],(1030,810,120)),
+ ('event_bus','srv_validacao_b',[(1070,850),(1270,850),(1270,550),(1170,550),(1170,525)],(1190,810,120)),
 ]
 assert set(nodes) == set(positions), 'Há caixas sem posição definida.'
 assert set(edges) == {(a,b) for a,b,_,_ in routes}, 'Há relações sem trajeto definido.'
@@ -72,7 +84,7 @@ for key,(x,y,w,h) in positions.items():
     svg.append(f'<foreignObject x="{x+10}" y="{ty}" width="{w-20}" height="{th}"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font:14px/1.5 Arial"><div>{label}</div></div></foreignObject>')
 for a,b,points,(x,y,w) in routes:
     # A posição dos rótulos é independente para mantê-los fora das caixas.
-    if (a,b)==('event_bus','srv_recarga'):
+    if (a,b)==('event_bus','srv_recarga_a'):
         x,y,w=780,565,105
     label=html.escape(edges[a,b])
     svg.append(f'<foreignObject x="{x-w/2}" y="{y-22}" width="{w}" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center;font:13px/1.3 Arial"><span style="background:#e5e5e5;padding:2px">{label}</span></div></foreignObject>')
@@ -80,10 +92,13 @@ svg.append('</svg>')
 target=ROOT/'c4-containers.svg'
 target.write_text('\n'.join(svg),encoding='utf-8')
 with sync_playwright() as p:
-    chrome=sorted((Path.home()/'.cache/puppeteer/chrome').glob('*/chrome-win64/chrome.exe'))[0]
-    browser=p.chromium.launch(executable_path=str(chrome),headless=True)
+    chrome_candidates = sorted((Path.home()/'.cache/puppeteer/chrome').glob('*/chrome-win64/chrome.exe'))
+    chrome_candidates += sorted((Path.home()/'AppData/Local/ms-playwright').glob('chromium-*/chrome-win*/chrome.exe'))
+    if not chrome_candidates:
+        raise FileNotFoundError('Chromium não encontrado; execute: python -m playwright install chromium')
+    browser=p.chromium.launch(executable_path=str(chrome_candidates[-1]),headless=True)
     page=browser.new_page(viewport={'width':1320,'height':1840},device_scale_factor=2)
     page.set_content('<html><body style="margin:0">'+''.join(svg)+'</body></html>')
     page.screenshot(path=str(ROOT/'c4-containers-layout.png'),full_page=True)
     browser.close()
-print('SVG e PNG gerados; 13 caixas e 18 relações preservadas.')
+print(f'SVG e PNG gerados; {len(nodes)} caixas e {len(routes)} relações preservadas.')

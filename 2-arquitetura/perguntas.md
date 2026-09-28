@@ -52,7 +52,7 @@ O diagrama que justifica essa decisão é o de Nível 2 (Contêineres), que most
 
 ### 4\. Como o repasse mensal é recalculado se uma regra de tarifa mudou no meio do mês?
 
-Cada viagem validada gera um evento imutável, o ValidacaoRealizada, que chega ao Consumidor de Eventos de Viagem e é gravado no Armazenamento de Eventos, sem sobrescrita, só acréscimo. Esse evento é a fonte de verdade da viagem: ele não muda depois, só pode ser reinterpretado.
+Cada viagem validada gera um evento imutável, o ValidacaoRealizada. O Serviço de Sincronização grava essa validação em um log persistente antes de confirmar definitivamente a sincronização para o ônibus. A publicação no Kafka ocorre posteriormente, a partir do registro persistido. Dessa forma, uma indisponibilidade temporária no Kafka não causa perda do registro da viagem nem da confirmação já registrada. O Serviço de Repasse e Conciliação consome o evento publicado para gerar suas projeções e resultados de fechamento; o armazenamento de eventos usado para suas projeções é append-only.
 
 As regras de tarifa não vivem dentro do Núcleo de Fechamento. Cada versão de tarifa é um plugin registrado no Registro de Regras Tarifárias com uma janela de vigência (data de início e, quando aplicável, data de fim), o mesmo mecanismo de contrato e descoberta do microkernel. Quando uma tarifa nova entra no meio do mês, ela só é acrescentada como mais um plugin: o núcleo não é alterado, e as regras antigas continuam registradas.
 
