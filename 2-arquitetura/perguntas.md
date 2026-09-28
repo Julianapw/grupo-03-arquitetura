@@ -18,19 +18,19 @@ O diagrama que justifica essa decisão é o de nível 2, que mostra a comunicaç
 
 ### 2\. Como o saldo do cartão fica consistente entre recarga no aplicativo e uso no ônibus, com atraso de sincronização?
 
-O saldo do cartão se mantém consistente entre recarga e aplicativo e uso no ônibus mesmo com atraso de sincronização porque, na arquitetura definida, o processo é o seguinte: o passageiro faz a recarga no aplicativo e o Serviço de Cartões e Recarga atualiza o saldo no banco de dados central, registrando uma ordem de pendente de escrita no cartão. A partir disso, a nuvem envia essa ordem de carga para a memória local dos validadores embarcados dos ônibus quando há conexão com a internet.
+O saldo do cartão não fica consistente de forma imediata: ele fica consistente de forma eventual, e a arquitetura assume isso de propósito. O saldo autoritário vive no backend, no Serviço de Cartões e Recarga. O validador embarcado nunca é a fonte da verdade. Nem o saldo guardado no validador nem o saldo guardado no cartão são considerados a referência, porque vários ônibus desconectados e vários canais de recarga poderiam manter estados diferentes ao mesmo tempo.
 
-Quando o passageiro aproxima o cartão na maquininha do ônibus que não está conectado à internet, o validador lê o código do cartão, consulta a memória local e encontra a ordem de carga pendente de escrita. Nesse momento, o próprio validador faz a escrita dos créditos no chip do cartão do usuário e já desconta o valor da passagem, permitindo que a catraca abra sem depender da rede.
+Durante a falta de conexão, o validador opera com uma visão local limitada, assinada e versionada, que é o último estado que ele conseguiu sincronizar. Se o passageiro recarrega pelo aplicativo, o Serviço de Cartões e Recarga atualiza o saldo autoritário e registra a recarga com um identificador único, mas um ônibus sem rede não fica sabendo disso naquele momento. Se o passageiro embarcar nesse ônibus logo depois, o validador decide com o último saldo que conhece, e a recarga pode não estar disponível ali até o próximo contato com o backend. É o trade-off registrado no ADR 0002: a passagem continua sendo validada durante as até quatro horas sem 4G, e em troca aceita-se um atraso temporário na disponibilidade da recarga.
 
-No momento em que o ônibus se conecta à internet, ele envia o lote de confirmações de escrita para o Serviço de Sincronização via barramento de eventos (Kafka), com um identificador único. A nuvem atualiza o status da transação para concluída e descarta eventuais duplicidades.
+Cada débito feito offline é registrado no ônibus com um identificador único, junto com cartão, ônibus e horário, e fica pendente. Quando a conexão volta, essas operações são enviadas pelo API Gateway ao Serviço de Sincronização, que as registra de forma persistente e as publica como eventos até o Serviço de Cartões e Recarga. Lá, recargas e débitos são reconciliados com o saldo autoritário. Como todos têm identificador único, a reconciliação é idempotente: um registro reenviado por falha de rede é reconhecido e não altera o saldo mais de uma vez. Depois disso, o ônibus recebe uma visão local atualizada na próxima sincronização.
+
+Durante a desconexão, portanto, existe um risco controlado de divergência, por exemplo um saldo negativo quando o mesmo cartão é usado em ônibus desconectados. A arquitetura garante que essas divergências são identificadas e registradas na reconciliação. A regra de negócio sobre como resolvê-las financeiramente é separada do mecanismo técnico e não é definida neste trabalho.
 
 Os ADRs que justificam essas decisões são:
 
-* 0001 — Justifica o uso de uma arquitetura baseada em eventos para desacoplar a compra no app da validação no ônibus.
-* 0002 — Estabelece que o saldo real deve ficar na nuvem e que a gravação física síncrona no chip do cartão deve ser feita pelo validador embarcado.
-* 0003 — Define o uso do barramento Kafka com identificador único para garantir a idempotência.
+0001 - Permite que o validador decida localmente sem rede, usando os dados mínimos armazenados no dispositivo. 0002 - Mantém o saldo autoritário no Serviço de Cartões e Recarga, define que o validador opera com uma visão local limitada, assinada e versionada, e que recargas e débitos são reconciliados de forma idempotente. 0003 - Define eventos assíncronos persistentes com identificadores únicos para levar as operações ao backend e tolerar reenvios.
 
-Os diagramas que justificam essa decisão são os de nível 1 e 2, que mapeiam visualmente as fronteiras de comunicação entre o validador embarcado, o API Gateway, o Serviço de Sincronização, o barramento Kafka e a base de cartões e saldos.
+Os diagramas que justificam essa decisão são os de nível 1 e 2, que mapeiam visualmente as fronteiras de comunicação entre o validador embarcado, o API Gateway, o Serviço de Sincronização, o barramento Kafka, o Serviço de Cartões e Recarga e a base de cartões e saldos.
 
 ### 3\. Como a telemetria escala no pico sem derrubar o restante do sistema?
 
