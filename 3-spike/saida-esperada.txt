@@ -33,8 +33,8 @@ Fase 4 - reentrega de rede: o mesmo lote e a mesma recarga chegam de novo.
   -> [IGNORADA] recarga recarga-app-b-1 ja processada (reentrega de rede)
 
 Fase 5 - o backend cruza os eventos aceitos por horario, entre onibus diferentes.
-Alertas de uso duplicado:
- - cartao cartao-A: aceito em onibus-101 no minuto 0 e em onibus-205 no minuto 4 (intervalo de 4 min) -- fisicamente impossivel
+Alertas de suspeita de conflito:
+ - cartao cartao-A: aceito em onibus-101 no minuto 0 e em onibus-205 no minuto 4 (intervalo de 4 min) -- suspeita de conflito
 
 RELATORIO FINAL
  - cartao-A: R$ -4.00 <- negativo

@@ -22,6 +22,10 @@ python3 spike.py
 
 Usa só biblioteca padrão do Python 3.12. O próprio script imprime o resultado na tela e, ao mesmo tempo, grava exatamente o mesmo conteúdo em `saida-esperada.txt`, na mesma pasta. Não é preciso redirecionar a saída manualmente; rodar o comando acima já gera o arquivo.
 
+## Limitações do Experimento
+
+O formato de identificador utilizado neste código (`onibus-id + posição no log`) é uma simplificação experimental puramente didática, suficiente para demonstrar em pequena escala que uma mesma mensagem reenviada pode ser reconhecida e ignorada pelo backend (idempotência). Em um ambiente de produção real com 1.200 validadores, a geração do identificador exige persistência (ex: UUID atrelado ao dispositivo + contador monotônico armazenado em flash memory) e não pode depender apenas da posição atual do log em memória local, para evitar colisões em caso de reinicialização do equipamento.
+
 ## O que aconteceria se a decisão estivesse errada
 
 Se o validador exigisse confirmação online a cada passagem, os dois ônibus não teriam aceitado nenhum embarque durante a desconexão, descumprindo o SLA de 99,9% nas janelas de até 4 horas sem 4G previstas no caso.

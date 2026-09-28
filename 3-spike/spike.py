@@ -106,7 +106,7 @@ class BackendDeReconciliacao:
                 self.conflitos.append(f"{evento.cartao_id} ficou negativo em {evento.id} ({evento.onibus_id})")
             print(f"  -> [DEBITO] {evento.cartao_id} -R$ {TARIFA} | saldo: R$ {saldo} | {status}")
 
-    def detectar_duplicidade_fisica(self) -> list:
+    def detectar_suspeita_de_conflito(self) -> list:
         alertas = []
         por_cartao: dict = {}
         for e in self.eventos_aceitos:
@@ -120,7 +120,7 @@ class BackendDeReconciliacao:
                     alertas.append(
                         f"cartao {cartao_id}: aceito em {anterior.onibus_id} no minuto "
                         f"{anterior.minuto} e em {atual.onibus_id} no minuto {atual.minuto} "
-                        f"(intervalo de {intervalo} min) -- fisicamente impossivel"
+                        f"(intervalo de {intervalo} min) -- suspeita de conflito"
                     )
                     self.bloqueados.add(cartao_id)
         return alertas
@@ -171,9 +171,9 @@ def main() -> None:
     backend.creditar_recarga("recarga-app-b-1", "cartao-B", Decimal("20.00"))
 
     print("\nFase 5 - o backend cruza os eventos aceitos por horario, entre onibus diferentes.")
-    alertas = backend.detectar_duplicidade_fisica()
+    alertas = backend.detectar_suspeita_de_conflito()
     if alertas:
-        print("Alertas de uso duplicado:")
+        print("Alertas de suspeita de conflito:")
         for a in alertas:
             print(f" - {a}")
 
