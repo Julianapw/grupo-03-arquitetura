@@ -14,49 +14,58 @@ end
 
 %% Fronteira da Nuvem Pública
 subgraph cloud ["Nuvem Pública (Consórcio)"]
-    
-    %% Topo da Nuvem
-    api_gateway["<b>API Gateway</b><br/>[Container: Kong / AWS]<br/>Ponto de entrada, autenticação e roteamento."]:::container
+    api_gateway["<b>API Gateway</b><br/>[Container: Kong / AWS]<br/>Ponto de entrada, autenticação e roteamento por chave estável do cartão."]:::container
 
-    %% Camada de Processamento
-    srv_recarga["<b>Serviço de Cartões e Recarga</b><br/>[Container: Go / Java]<br/>Saldo autoritativo."]:::container
-    srv_validacao["<b>Serviço de Sincronização</b><br/>[Container: Go / Node.js]<br/>Processa lotes de viagens."]:::container
+    %% Célula A - serviços críticos definidos pelo ADR 0005
+    subgraph celula_a ["Célula A — Serviços Críticos"]
+        srv_recarga_a["<b>Serviço de Cartões e Recarga A</b><br/>[Container: Go / Java]<br/>Saldo autoritativo dos cartões da célula."]:::container
+        srv_validacao_a["<b>Serviço de Sincronização A</b><br/>[Container: Go / Node.js]<br/>Processa lotes de viagens da célula."]:::container
+        db_cartoes_a[("<b>Base de Cartões e Saldos A</b><br/>[Database: PostgreSQL]<br/>Dados dos cartões da célula.")]:::database
+        srv_recarga_a -->|SQL| db_cartoes_a
+    end
+
+    %% Célula B - representa outra célula independente
+    subgraph celula_b ["Célula B — Serviços Críticos"]
+        srv_recarga_b["<b>Serviço de Cartões e Recarga B</b><br/>[Container: Go / Java]<br/>Saldo autoritativo dos cartões da célula."]:::container
+        srv_validacao_b["<b>Serviço de Sincronização B</b><br/>[Container: Go / Node.js]<br/>Processa lotes de viagens da célula."]:::container
+        db_cartoes_b[("<b>Base de Cartões e Saldos B</b><br/>[Database: PostgreSQL]<br/>Dados dos cartões da célula.")]:::database
+        srv_recarga_b -->|SQL| db_cartoes_b
+    end
+
+    %% Subdomínios que não receberam arquitetura celular no ADR 0005
     srv_telemetria["<b>Serviço de Telemetria</b><br/>[Container: Go / Python]<br/>Ingestão GPS (400 msg/s)."]:::container
-
-    %% Mensageria e Dados Superiores
-    db_cartoes[("<b>Base de Cartões e Saldos</b><br/>[Database: PostgreSQL]<br/>Saldos autoritativos.")]:::database
     event_bus["<b>Barramento de Eventos</b><br/>[Container: Apache Kafka]<br/>Fila de eventos assíncrona."]:::container
-
-    %% Processamento Posterior (Repasse)
     srv_repasse["<b>Serviço de Repasse e Conciliação</b><br/>[Container: Java / C#]<br/>Gera arquivos de repasse."]:::container
-
-    %% Dados Inferiores
     db_events[("<b>Armazenamento de Eventos</b><br/>[Database: EventStore]<br/>Event Sourcing imutável.")]:::database
 end
 
-%% Conexões Externas -> API Gateway
+%% Entrada externa
 passageiro -->|HTTPS: Compra recarga| api_gateway
 validador -->|HTTPS/gRPC: Sincroniza lotes| api_gateway
 
-%% API Gateway -> Serviços
-api_gateway -->|HTTPS| srv_recarga
-api_gateway -->|HTTPS| srv_validacao
+%% Roteamento para a célula responsável.
+%% A e B representam múltiplas células; não definem a quantidade final em produção.
+api_gateway -->|Chave estável do cartão → Célula A| srv_recarga_a
+api_gateway -->|Chave estável do cartão → Célula A| srv_validacao_a
+api_gateway -->|Chave estável do cartão → Célula B| srv_recarga_b
+api_gateway -->|Chave estável do cartão → Célula B| srv_validacao_b
+
+%% Serviço não celular
 api_gateway -->|HTTPS| srv_telemetria
 
-%% Serviços -> Bancos e Barramento
-srv_recarga -->|SQL| db_cartoes
-srv_recarga -->|Kafka Protocol| event_bus
-srv_validacao -->|Kafka Protocol| event_bus
+%% Publicação de eventos
+srv_recarga_a -->|Kafka Protocol| event_bus
+srv_validacao_a -->|Kafka Protocol| event_bus
+srv_recarga_b -->|Kafka Protocol| event_bus
+srv_validacao_b -->|Kafka Protocol| event_bus
 srv_telemetria -->|Kafka Protocol: Ingestão 400 msg/s| event_bus
 
-%% Barramento -> Repasse
+%% Processamento posterior
 event_bus -->|Consome eventos| srv_repasse
-
-%% Repasse -> EventStore e Banco Externo
 srv_repasse -->|Append-Only| db_events
 srv_repasse -->|SFTP / HTTPS| banco
 
-%% Complemento do Kauê — Borda e consumo dos eventos
+%% Borda (mantida conforme o desenho anterior)
 subgraph Borda ["Borda (Dentro do Ônibus)"]
     db_local[("<b>Base Local do Validador</b><br/>[Database: SQLite]<br/>Saldo, regras e viagens pendentes.")]:::database
     agente_sync["<b>Agente de Sincronização</b><br/>[Container: Aplicação embarcada]<br/>Reenvia pendências quando a rede volta."]:::container
@@ -66,5 +75,9 @@ validador -->|SQL: Consulta saldo e registra viagem| db_local
 validador -->|Chamada local: Inicia envio| agente_sync
 agente_sync -->|SQL: Lê pendências e salva confirmações| db_local
 agente_sync -->|HTTPS/gRPC: Envia lote e recebe confirmação| api_gateway
-event_bus -->|Consome validações: Reconcilia saldo| srv_recarga
-event_bus -->|Consome validações: Verifica conflitos| srv_validacao
+
+%% Cada célula consome as validações correspondentes aos cartões sob sua responsabilidade
+event_bus -->|Validações da Célula A| srv_recarga_a
+event_bus -->|Validações da Célula A: Verifica conflitos| srv_validacao_a
+event_bus -->|Validações da Célula B| srv_recarga_b
+event_bus -->|Validações da Célula B: Verifica conflitos| srv_validacao_b
